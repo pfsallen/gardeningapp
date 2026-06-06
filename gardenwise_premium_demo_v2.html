@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GardenWise — Personal Garden Intelligence</title>
+  <style>
+    :root{
+      --bg:#f4f1e8;
+      --surface:#fffdf7;
+      --surface-2:#f8f7ef;
+      --ink:#17251d;
+      --muted:#667164;
+      --line:#dfdece;
+      --pine:#173f2c;
+      --pine-2:#25563d;
+      --sage:#dbe8d2;
+      --sage-2:#edf4e8;
+      --clay:#bb6b43;
+      --gold:#d4a84f;
+      --mist:#e9eee4;
+      --danger:#a74836;
+      --warn:#b8772c;
+      --success:#376b45;
+      --shadow-sm:0 6px 18px rgba(32,49,38,.08);
+      --shadow-md:0 18px 45px rgba(32,49,38,.14);
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:16px;
+      --radius-sm:12px;
+      --sidebar:294px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(219,232,210,.9), transparent 34rem),
+        radial-gradient(circle at 80% 10%, rgba(212,168,79,.14), transparent 28rem),
+        linear-gradient(180deg,#f7f4eb 0%,#ece9dd 100%);
+      color:var(--ink);
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    input,select,textarea{
+      width:100%;
+      border:1px solid #d8d7c7;
+      background:#fffefa;
+      color:var(--ink);
+      border-radius:14px;
+      padding:12px 13px;
+      outline:none;
+      transition:border .18s, box-shadow .18s, background .18s;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#8fab82;
+      box-shadow:0 0 0 4px rgba(143,171,130,.18);
+      background:#fff;
+    }
+    textarea{min-height:104px;resize:vertical}
+
+    .shell{
+      display:grid;
+      grid-template-columns:var(--sidebar) 1fr;
+      min-height:100vh;
+    }
+
+    aside{
+      position:sticky;
+      top:0;
+      height:100vh;
+      padding:26px 22px;
+      background:rgba(255,253,247,.82);
+      border-right:1px solid rgba(223,222,206,.9);
+      backdrop-filter:blur(18px);
+      overflow:auto;
+      z-index:2;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      margin-bottom:26px;
+    }
+
+    .brand-mark{
+      width:48px;
+      height:48px;
+      border-radius:17px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(145deg,#214d36,#102f22);
+      box-shadow:0 14px 30px rgba(23,63,44,.25);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .brand-mark:before{
+      content:"";
+      position:absolute;
+      width:28px;
+      height:28px;
+      border-radius:28px 0 28px 0;
+      background:#dbe8d2;
+      transform:rotate(-24deg);
+      top:12px;
+      left:13px;
+      box-shadow:9px -4px 0 -2px rgba(212,168,79,.95);
+    }
+
+    .brand-title{
+      margin:0;
+      font-size:1.08rem;
+      letter-spacing:-.035em;
+      line-height:1.1;
+    }
+
+    .brand-kicker{
+      margin:.18rem 0 0;
+      color:var(--muted);
+      font-size:.78rem;
+      letter-spacing:.02em;
+    }
+
+    .nav-label{
+      color:#87907f;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.68rem;
+      font-weight:800;
+      margin:24px 10px 10px;
+    }
+
+    .nav{
+      display:grid;
+      gap:7px;
+    }
+
+    .nav button{
+      border:0;
+      width:100%;
+      text-align:left;
+      padding:12px 13px;
+      border-radius:15px;
+      background:transparent;
+      color:#314236;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      font-weight:700;
+      transition:background .18s, color .18s, transform .18s;
+    }
+
+    .nav button:hover{
+      background:rgba(219,232,210,.55);
+      transform:translateX(2px);
+    }
+
+    .nav button.active{
+      background:var(--pine);
+      color:#fffdf7;
+      box-shadow:0 12px 25px rgba(23,63,44,.20);
+    }
+
+    .nav-icon{
+      width:32px;
+      height:32px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:rgba(219,232,210,.65);
+      color:var(--pine);
+      flex:0 0 auto;
+    }
+
+    .nav button.active .nav-icon{
+      background:rgba(255,255,255,.16);
+      color:white;
+    }
+
+    .side-panel{
+      margin-top:22px;
+      padding:17px;
+      border-radius:22px;
+      background:
+        linear-gradient(160deg,rgba(219,232,210,.75),rgba(255,253,247,.72));
+      border:1px solid rgba(211,220,201,.9);
+    }
+
+    .side-panel h3{
+      margin:0 0 7px;
+      font-size:.93rem;
+      letter-spacing:-.02em;
+    }
+
+    .side-panel p{
+      margin:0;
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.45;
+    }
+
+    .side-metric{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:13px;
+      padding-top:13px;
+      border-top:1px solid rgba(187,198,174,.7);
+      font-size:.82rem;
+      color:var(--muted);
+    }
+
+    .side-metric strong{font-size:1.15rem;color:var(--pine)}
+
+    main{
+      padding:30px clamp(18px,3vw,42px) 44px;
+      overflow:auto;
+    }
+
+    .hero{
+      background:
+        linear-gradient(120deg,rgba(23,63,44,.96),rgba(32,87,60,.92)),
+        radial-gradient(circle at 95% 10%,rgba(212,168,79,.52),transparent 18rem);
+      color:white;
+      border-radius:34px;
+      padding:28px;
+      min-height:210px;
+      box-shadow:var(--shadow-md);
+      position:relative;
+      overflow:hidden;
+      margin-bottom:22px;
+    }
+
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-70px;
+      top:-90px;
+      width:310px;
+      height:310px;
+      border-radius:50%;
+      border:44px solid rgba(255,255,255,.07);
+    }
+
+    .hero-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:22px;
+      align-items:start;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:7px 11px;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.055em;
+      text-transform:uppercase;
+      color:#edf7e9;
+      backdrop-filter:blur(8px);
+    }
+
+    .hero h1{
+      margin:17px 0 8px;
+      font-size:clamp(2rem,4vw,3.55rem);
+      letter-spacing:-.07em;
+      line-height:.98;
+      max-width:790px;
+    }
+
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.78);
+      font-size:1.03rem;
+      line-height:1.55;
+      max-width:720px;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:1px solid transparent;
+      border-radius:15px;
+      padding:11px 15px;
+      font-weight:800;
+      background:var(--pine);
+      color:white;
+      box-shadow:0 12px 22px rgba(23,63,44,.18);
+      transition:transform .15s, box-shadow .15s, background .15s;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 28px rgba(23,63,44,.2)}
+    .btn.primary-light{
+      background:#fffdf7;
+      color:var(--pine);
+      border-color:rgba(255,255,255,.2);
+      box-shadow:0 12px 26px rgba(0,0,0,.16);
+    }
+    .btn.secondary{
+      background:var(--surface);
+      color:var(--pine);
+      border-color:#d6d7c5;
+      box-shadow:none;
+    }
+    .btn.ghost{
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      border-color:rgba(255,255,255,.18);
+      box-shadow:none;
+    }
+    .btn.subtle{
+      background:transparent;
+      color:var(--pine);
+      border-color:#d4d7c4;
+      box-shadow:none;
+    }
+
+    .view-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:16px;
+      margin:6px 0 16px;
+    }
+
+    .view-header h2{
+      margin:0;
+      font-size:1.65rem;
+      letter-spacing:-.045em;
+    }
+
+    .view-header p{
+      margin:.35rem 0 0;
+      color:var(--muted);
+    }
+
+    .grid{display:grid;gap:18px}
+    .stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+    .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .two-col{grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);align-items:start}
+    .detail-layout{grid-template-columns:minmax(0,1fr) 390px;align-items:start}
+    .compare-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+    .panel,.stat,.plant-card{
+      background:rgba(255,253,247,.88);
+      border:1px solid rgba(223,222,206,.95);
+      border-radius:var(--radius-xl);
+      box-shadow:var(--shadow-sm);
+    }
+
+    .panel{padding:20px}
+    .stat{padding:18px;position:relative;overflow:hidden}
+    .stat:after{
+      content:"";
+      position:absolute;
+      right:-34px;
+      top:-42px;
+      width:104px;
+      height:104px;
+      border-radius:50%;
+      background:rgba(219,232,210,.55);
+    }
+    .stat-label{
+      color:var(--muted);
+      font-weight:750;
+      font-size:.84rem;
+      margin-top:4px;
+    }
+    .stat-value{
+      font-size:2.1rem;
+      font-weight:900;
+      letter-spacing:-.07em;
+      position:relative;
+      z-index:1;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .section-title h3{
+      margin:0;
+      font-size:1.15rem;
+      letter-spacing:-.035em;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.45;
+    }
+
+    .plant-card{
+      padding:13px;
+      display:flex;
+      flex-direction:column;
+      min-height:378px;
+      overflow:hidden;
+      transition:transform .18s, box-shadow .18s, border-color .18s;
+    }
+    .plant-card:hover{
+      transform:translateY(-3px);
+      box-shadow:var(--shadow-md);
+      border-color:#cdd5bf;
+    }
+
+    .plant-visual{
+      height:172px;
+      border-radius:23px;
+      position:relative;
+      overflow:hidden;
+      background:
+        linear-gradient(140deg,#e7eddf,#c7dcc0);
+      display:grid;
+      place-items:center;
+      margin-bottom:15px;
+    }
+
+    .plant-visual img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .plant-visual svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+
+    .visual-label{
+      position:absolute;
+      left:13px;
+      bottom:13px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,253,247,.84);
+      backdrop-filter:blur(10px);
+      color:var(--pine);
+      font-size:.76rem;
+      font-weight:850;
+      border:1px solid rgba(255,255,255,.45);
+      box-shadow:0 8px 18px rgba(0,0,0,.08);
+    }
+
+    .plant-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .plant-name{
+      margin:0;
+      font-size:1.18rem;
+      letter-spacing:-.035em;
+    }
+
+    .plant-subtitle{
+      margin:.18rem 0 0;
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.35;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      width:max-content;
+      max-width:100%;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:.75rem;
+      font-weight:850;
+      background:var(--sage-2);
+      color:var(--pine);
+      border:1px solid #d7e5ce;
+      white-space:nowrap;
+    }
+    .chip.good{background:#edf5e8;color:var(--success);border-color:#cfe0c7}
+    .chip.warn{background:#fff4e6;color:var(--warn);border-color:#ead3ad}
+    .chip.danger{background:#fff0ed;color:var(--danger);border-color:#edc5bd}
+    .chip.dark{background:var(--pine);color:white;border-color:var(--pine)}
+
+    .plant-meta{
+      display:grid;
+      gap:9px;
+      margin:15px 0;
+    }
+
+    .metric-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:10px 0;
+      border-bottom:1px solid rgba(223,222,206,.72);
+    }
+    .metric-row span:first-child{
+      color:var(--muted);
+      font-size:.83rem;
+      font-weight:700;
+    }
+    .metric-row strong{
+      text-align:right;
+      font-size:.9rem;
+      font-weight:850;
+      color:#263529;
+    }
+
+    .card-footer{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-top:auto;
+    }
+
+    .progress-bar{
+      height:9px;
+      border-radius:999px;
+      background:#e7e6d8;
+      overflow:hidden;
+      margin-top:8px;
+    }
+    .progress-bar span{
+      display:block;
+      height:100%;
+      background:linear-gradient(90deg,var(--pine-2),#7e9e68);
+      border-radius:999px;
+    }
+
+    .task{
+      display:grid;
+      grid-template-columns:102px minmax(0,1fr) auto;
+      gap:14px;
+      align-items:center;
+      padding:15px;
+      border:1px solid rgba(223,222,206,.94);
+      border-radius:22px;
+      background:#fffdf8;
+      box-shadow:0 8px 18px rgba(32,49,38,.05);
+    }
+
+    .task-date{
+      text-align:center;
+      border-radius:18px;
+      padding:12px 8px;
+      background:linear-gradient(180deg,var(--sage-2),#f8fbf5);
+      color:var(--pine);
+      font-weight:950;
+      letter-spacing:-.03em;
+      border:1px solid #d7e5ce;
+    }
+    .task-date small{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-weight:750;
+      letter-spacing:0;
+    }
+
+    .timeline{
+      display:grid;
+      gap:12px;
+    }
+
+    .timeline-item{
+      display:grid;
+      grid-template-columns:104px 1fr;
+      gap:13px;
+      padding:14px;
+      border:1px solid rgba(223,222,206,.88);
+      border-radius:22px;
+      background:#fffdf8;
+      position:relative;
+    }
+
+    .timeline-date{
+      color:var(--pine);
+      font-weight:900;
+      font-size:.84rem;
+      line-height:1.3;
+    }
+
+    .timeline-body strong{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      font-size:.95rem;
+    }
+    .timeline-body p{
+      margin:.35rem 0 0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:13px;
+    }
+    label{
+      display:grid;
+      gap:7px;
+      color:#334236;
+      font-weight:850;
+      font-size:.84rem;
+    }
+    .full{grid-column:1/-1}
+
+    .photo-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+    .photo-tile{
+      border-radius:20px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:#fffdf8;
+      box-shadow:0 8px 18px rgba(32,49,38,.04);
+    }
+    .photo-image{
+      height:130px;
+      background:linear-gradient(140deg,#e7eddf,#cadfc3);
+      position:relative;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .photo-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .photo-caption{
+      padding:10px;
+      font-size:.78rem;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .photo-caption strong{color:var(--pine)}
+
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 10px;
+    }
+    .table th{
+      text-align:left;
+      padding:0 13px;
+      color:var(--muted);
+      font-size:.78rem;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+    .table td{
+      padding:14px 13px;
+      background:#fffdf8;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+    }
+    .table td:first-child{
+      border-left:1px solid var(--line);
+      border-radius:16px 0 0 16px;
+    }
+    .table td:last-child{
+      border-right:1px solid var(--line);
+      border-radius:0 16px 16px 0;
+    }
+
+    .insight{
+      border-left:7px solid var(--gold);
+    }
+
+    .empty{
+      padding:36px 16px;
+      text-align:center;
+      border:1px dashed #cfd6c4;
+      background:rgba(255,253,247,.62);
+      color:var(--muted);
+      border-radius:24px;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:50;
+      background:rgba(15,25,18,.48);
+      backdrop-filter:blur(7px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modal-panel{
+      width:min(940px,100%);
+      max-height:90vh;
+      overflow:auto;
+      background:var(--surface);
+      border:1px solid rgba(255,255,255,.4);
+      border-radius:32px;
+      padding:24px;
+      box-shadow:0 28px 80px rgba(0,0,0,.28);
+    }
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .modal-head h3{
+      margin:0;
+      font-size:1.45rem;
+      letter-spacing:-.045em;
+    }
+    .x{
+      width:38px;
+      height:38px;
+      border:0;
+      border-radius:14px;
+      background:var(--sage-2);
+      color:var(--pine);
+      font-size:1.25rem;
+      font-weight:850;
+    }
+
+    .toast{
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      padding:13px 16px;
+      border-radius:16px;
+      background:#142d21;
+      color:#fff;
+      box-shadow:0 18px 45px rgba(0,0,0,.22);
+      opacity:0;
+      transform:translateY(16px);
+      transition:.2s;
+      z-index:80;
+      font-weight:800;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    .hidden{display:none!important}
+    .inline-controls{display:flex;gap:9px;flex-wrap:wrap;align-items:end}
+    .file-drop{
+      border:1px dashed #b9c8b0;
+      background:#fbfbf4;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    @media (max-width:1100px){
+      .shell{grid-template-columns:1fr}
+      aside{
+        position:relative;
+        height:auto;
+        border-right:0;
+        border-bottom:1px solid var(--line);
+      }
+      .nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .nav button{justify-content:center;text-align:center}
+      .nav button span:last-child{display:none}
+      .side-panel{display:none}
+      .hero-grid,.detail-layout,.two-col{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media (max-width:680px){
+      main{padding:18px}
+      aside{padding:18px}
+      .hero{padding:21px;border-radius:26px}
+      .hero-actions{justify-content:flex-start}
+      .view-header{display:grid;align-items:start}
+      .stats,.cards,.compare-grid{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .task{grid-template-columns:1fr}
+      .timeline-item{grid-template-columns:1fr}
+      .table th:nth-child(5),.table td:nth-child(5){display:none}
+      .nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media print{
+      aside,.hero-actions,.btn,.modal,.toast{display:none!important}
+      .shell{display:block}
+      main{padding:0}
+      .panel,.stat,.plant-card{box-shadow:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1 class="brand-title">GardenWise</h1>
+          <p class="brand-kicker">Personal garden intelligence</p>
+        </div>
+      </div>
+
+      <div class="nav-label">Workspace</div>
+      <nav class="nav">
+        <button class="active" data-view="dashboard"><span class="nav-icon">⌂</span><span>Garden</span></button>
+        <button data-view="calendar"><span class="nav-icon">◷</span><span>Care Plan</span></button>
+        <button data-view="journal"><span class="nav-icon">✎</span><span>Journal</span></button>
+        <button data-view="analytics"><span class="nav-icon">◎</span><span>Results</span></button>
+      </nav>
+
+      <div class="side-panel">
+        <h3>Beta demo goal</h3>
+        <p>Show how gardeners can connect care routines, photos, observations, and outcomes in one clean timeline.</p>
+        <div class="side-metric">
+          <span>Prototype version</span>
+          <strong>2.0</strong>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <h3>Design direction</h3>
+        <p>Premium, calm, natural, and credible — closer to a wellness or field-research app than a hobby spreadsheet.</p>
+      </div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Beta concept</span>
+            <h1 id="heroTitle">Know what works in your garden.</h1>
+            <p id="heroSubtitle">Track plant care, photos, schedules, observations, and results so every season teaches you something useful.</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn primary-light" id="addPlantBtn">Add plant</button>
+            <button class="btn ghost" id="exportBtn">Export</button>
+            <button class="btn ghost" id="importBtn">Import</button>
+            <button class="btn ghost" id="resetBtn">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="dashboardView">
+        <div class="view-header">
+          <div>
+            <h2>Garden dashboard</h2>
+            <p>Plant profiles, next care tasks, health status, and growing history.</p>
+          </div>
+          <span class="chip dark">Local demo data</span>
+        </div>
+        <div class="grid stats" id="stats"></div>
+        <div class="section-title">
+          <h3>Your plants</h3>
+          <span class="small-note">Open a plant to view photos, care history, and schedules.</span>
+        </div>
+        <div class="grid cards" id="plantCards"></div>
+      </section>
+
+      <section id="calendarView" class="hidden">
+        <div class="view-header">
+          <div>
+            <h2>Care plan</h2>
+            <p>Watering and fertilizing tasks generated from each plant’s profile.</p>
+          </div>
+          <select id="taskRange" style="max-width:180px">
+            <option value="14">Next 14 days</option>
+            <option value="30">Next 30 days</option>
+            <option value="60">Next 60 days</option>
+          </select>
+        </div>
+        <div class="panel">
+          <div class="section-title">
+            <h3>Upcoming tasks</h3>
+            <span class="small-note">Mark tasks done to update the next due date.</span>
+          </div>
+          <div class="grid" id="taskList"></div>
+        </div>
+      </section>
+
+      <section id="journalView" class="hidden">
+        <div class="view-header">
+          <div>
+            <h2>Garden journal</h2>
+            <p>Record what you did, what you noticed, and what changed afterward.</p>
+          </div>
+        </div>
+
+        <div class="grid two-col">
+          <div class="panel">
+            <div class="section-title">
+              <h3>Care and observation history</h3>
+              <div class="inline-controls">
+                <select id="journalPlantFilter"></select>
+                <select id="journalTypeFilter">
+                  <option value="all">All actions</option>
+                  <option value="Watered">Watered</option>
+                  <option value="Fertilized">Fertilized</option>
+                  <option value="Pruned">Pruned</option>
+                  <option value="Treated pest/disease">Treated pest/disease</option>
+                  <option value="Observed">Observed</option>
+                  <option value="Harvested">Harvested</option>
+                </select>
+              </div>
+            </div>
+            <div class="timeline" id="journalList"></div>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-top:0">Add quick entry</h3>
+            <p class="small-note">Best practice: write down the care action and the result you saw later.</p>
+            <form id="quickEntryForm" class="form-grid">
+              <label>Plant
+                <select id="quickPlant"></select>
+              </label>
+              <label>Action
+                <select id="quickAction">
+                  <option>Watered</option>
+                  <option>Fertilized</option>
+                  <option>Pruned</option>
+                  <option>Treated pest/disease</option>
+                  <option>Observed</option>
+                  <option>Harvested</option>
+                </select>
+              </label>
+              <label>Date
+                <input id="quickDate" type="date"/>
+              </label>
+              <label>Result
+                <select id="quickRating">
+                  <option value="5">5 — excellent</option>
+                  <option value="4">4 — good</option>
+                  <option value="3">3 — neutral</option>
+                  <option value="2">2 — poor</option>
+                  <option value="1">1 — problem</option>
+                </select>
+              </label>
+              <label class="full">Notes
+                <textarea id="quickNotes" placeholder="What did you do? What happened afterward?"></textarea>
+              </label>
+              <button class="btn full" type="submit">Save entry</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="analyticsView" class="hidden">
+        <div class="view-header">
+          <div>
+            <h2>Results</h2>
+            <p>Turn your care history into patterns, comparisons, and seasonal lessons.</p>
+          </div>
+        </div>
+        <div class="grid stats" id="analyticsStats"></div>
+        <div class="grid compare-grid">
+          <div class="panel insight">
+            <h3 style="margin-top:0">What this can reveal</h3>
+            <p class="small-note">Which location performs best? Which fertilizer correlates with healthier growth? Which plants need more water during heat? Which problems return by season?</p>
+          </div>
+          <div class="panel insight">
+            <h3 style="margin-top:0">Current insight</h3>
+            <p class="small-note" id="bestInsight">Add more entries to generate a useful insight.</p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="section-title">
+            <h3>Plant performance snapshot</h3>
+            <span class="small-note">Ratings come from journal entries.</span>
+          </div>
+          <table class="table" id="performanceTable"></table>
+        </div>
+      </section>
+
+      <section id="plantDetailView" class="hidden"></section>
+    </main>
+  </div>
+
+  <div class="modal hidden" id="plantModal" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div>
+          <h3>Add a plant profile</h3>
+          <p class="small-note">Create a profile, baseline conditions, and care rhythm.</p>
+        </div>
+        <button class="x" id="closePlantModal" aria-label="Close">×</button>
+      </div>
+      <form id="plantForm" class="form-grid">
+        <label>Plant name
+          <input id="plantName" required placeholder="Tomatoes"/>
+        </label>
+        <label>Variety / cultivar
+          <input id="plantVariety" placeholder="Sun Gold, Genovese, Endless Summer..."/>
+        </label>
+        <label>Plant type
+          <select id="plantType">
+            <option>Vegetable</option><option>Herb</option><option>Flower</option>
+            <option>Houseplant</option><option>Shrub</option><option>Tree</option><option>Other</option>
+          </select>
+        </label>
+        <label>Date planted
+          <input id="plantDate" type="date" required/>
+        </label>
+        <label>Location
+          <input id="plantLocation" placeholder="Raised bed 1, patio pot, kitchen window..."/>
+        </label>
+        <label>Sun exposure
+          <select id="plantSun">
+            <option>Full sun</option><option>Part sun</option><option>Part shade</option><option>Shade</option>
+            <option>Indoor bright light</option><option>Indoor low light</option>
+          </select>
+        </label>
+        <label>Soil / medium
+          <input id="plantSoil" placeholder="Potting mix, sandy soil, compost blend..."/>
+        </label>
+        <label>Container / bed
+          <input id="plantContainer" placeholder="10 gal grow bag, raised bed, in-ground..."/>
+        </label>
+        <label>Water every X days
+          <input id="plantWaterDays" type="number" min="1" value="3"/>
+        </label>
+        <label>Watering note
+          <input id="plantWaterNote" placeholder="Deep watering, check top inch of soil..."/>
+        </label>
+        <label>Fertilize every X days
+          <input id="plantFertDays" type="number" min="1" value="14"/>
+        </label>
+        <label>Fertilizer note
+          <input id="plantFertNote" placeholder="Diluted liquid feed, tomato fertilizer..."/>
+        </label>
+        <label>Current health
+          <select id="plantHealth">
+            <option value="Excellent">Excellent</option><option value="Good" selected>Good</option>
+            <option value="Watch">Watch</option><option value="Problem">Problem</option>
+          </select>
+        </label>
+        <label>Goal / expected result
+          <input id="plantGoal" placeholder="More blooms, first harvest, fewer yellow leaves..."/>
+        </label>
+        <label class="full">Notes
+          <textarea id="plantNotes" placeholder="Special care instructions, pests to watch for, what you are testing..."></textarea>
+        </label>
+        <button class="btn full" type="submit">Create plant profile</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="importModal" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div>
+          <h3>Import demo data</h3>
+          <p class="small-note">Paste JSON exported from this prototype.</p>
+        </div>
+        <button class="x" id="closeImportModal" aria-label="Close">×</button>
+      </div>
+      <textarea id="importText" style="min-height:240px" placeholder="Paste exported JSON here"></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn" id="doImportBtn">Import</button>
+        <button class="btn secondary" id="cancelImportBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    const STORAGE_KEY = "gardenwise-premium-v2";
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const uid = () => Math.random().toString(36).slice(2,10);
+    const fmt = (iso) => {
+      if(!iso) return "Not set";
+      const [y,m,d]=iso.split("-").map(Number);
+      return new Date(y,m-1,d).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    };
+    const shortDate = (iso) => {
+      const [y,m,d]=iso.split("-").map(Number);
+      return new Date(y,m-1,d).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    };
+    const dayName = (iso) => {
+      const [y,m,d]=iso.split("-").map(Number);
+      return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:"short"});
+    };
+    const daysBetween = (a,b) => Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);
+    const addDays = (iso, days) => {
+      const d = new Date(iso+"T00:00:00");
+      d.setDate(d.getDate()+Number(days));
+      return d.toISOString().slice(0,10);
+    };
+
+    const sampleData = () => ({
+      plants:[
+        {
+          id:"p-tomato",
+          name:"Tomatoes",
+          variety:"Sun Gold cherry tomato",
+          type:"Vegetable",
+          planted:"2026-05-05",
+          location:"Raised bed near back fence",
+          sun:"Full sun",
+          soil:"Compost-rich raised bed mix",
+          container:"Raised bed 1",
+          health:"Good",
+          goal:"High yield and fewer split fruits",
+          notes:"Testing deeper watering and less frequent fertilizer.",
+          water:{days:2,note:"Water deeply in the morning; increase during heat waves."},
+          fertilizer:{days:14,note:"Organic tomato fertilizer; avoid overfeeding nitrogen."},
+          photos:[
+            {id:"ph1",date:"2026-05-05",caption:"Transplant day",src:"illustration:vegetable"},
+            {id:"ph2",date:"2026-05-24",caption:"First flowers",src:"illustration:flower"}
+          ]
+        },
+        {
+          id:"p-basil",
+          name:"Basil",
+          variety:"Genovese",
+          type:"Herb",
+          planted:"2026-05-15",
+          location:"Patio container",
+          sun:"Part sun",
+          soil:"Potting mix with compost",
+          container:"12 inch terracotta pot",
+          health:"Excellent",
+          goal:"Bushy growth for weekly harvest",
+          notes:"Pinch regularly before flowering.",
+          water:{days:2,note:"Keep evenly moist, not soggy."},
+          fertilizer:{days:21,note:"Half-strength liquid feed."},
+          photos:[
+            {id:"ph3",date:"2026-05-15",caption:"New seedling",src:"illustration:herb"},
+            {id:"ph4",date:"2026-06-01",caption:"Ready to pinch",src:"illustration:leaf"}
+          ]
+        },
+        {
+          id:"p-hydrangea",
+          name:"Hydrangea",
+          variety:"Endless Summer",
+          type:"Shrub",
+          planted:"2026-04-28",
+          location:"Front foundation bed",
+          sun:"Part shade",
+          soil:"Moist acidic soil with mulch",
+          container:"In-ground bed",
+          health:"Watch",
+          goal:"Reduce wilting and improve blooms",
+          notes:"Afternoon droop may be heat stress. Track watering carefully.",
+          water:{days:3,note:"Deep water at root zone; keep mulch in place."},
+          fertilizer:{days:30,note:"Slow-release fertilizer for acid-loving plants."},
+          photos:[
+            {id:"ph5",date:"2026-04-28",caption:"Planted after nursery purchase",src:"illustration:flower"},
+            {id:"ph6",date:"2026-05-30",caption:"Some afternoon wilting",src:"illustration:shrub"}
+          ]
+        }
+      ],
+      entries:[
+        {id:"e1",plantId:"p-tomato",date:"2026-05-19",action:"Watered",rating:4,notes:"Deep watered at base. Leaves looked strong the next morning."},
+        {id:"e2",plantId:"p-tomato",date:"2026-05-24",action:"Fertilized",rating:4,notes:"Applied tomato fertilizer. First flowers visible."},
+        {id:"e3",plantId:"p-basil",date:"2026-05-25",action:"Pruned",rating:5,notes:"Pinched top leaves. Plant is getting bushier."},
+        {id:"e4",plantId:"p-hydrangea",date:"2026-05-30",action:"Observed",rating:2,notes:"Wilted in afternoon heat. May need deeper watering or more mulch."},
+        {id:"e5",plantId:"p-basil",date:"2026-06-01",action:"Harvested",rating:5,notes:"Small harvest for dinner; plant still looks healthy."}
+      ]
+    });
+
+    let state = loadState();
+    let currentView = "dashboard";
+    let selectedPlantId = null;
+
+    function loadState(){
+      try{
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if(saved) return JSON.parse(saved);
+      }catch(e){}
+      return sampleData();
+    }
+    function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
+    function showToast(msg="Saved"){
+      const t=document.getElementById("toast");
+      t.textContent=msg;
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"),1800);
+    }
+
+    function plantById(id){return state.plants.find(p=>p.id===id)}
+    function entriesForPlant(id){return state.entries.filter(e=>e.plantId===id).sort((a,b)=>b.date.localeCompare(a.date))}
+    function latestPhoto(plant){return [...(plant.photos||[])].sort((a,b)=>b.date.localeCompare(a.date))[0]}
+    function lastActionDate(plantId, action){
+      const e = state.entries.filter(x=>x.plantId===plantId && x.action===action).sort((a,b)=>b.date.localeCompare(a.date))[0];
+      return e ? e.date : plantById(plantId).planted;
+    }
+    function nextTaskDate(plant, action){
+      if(action==="Watered") return addDays(lastActionDate(plant.id,"Watered"), plant.water.days);
+      if(action==="Fertilized") return addDays(lastActionDate(plant.id,"Fertilized"), plant.fertilizer.days);
+      return plant.planted;
+    }
+    function avgRating(plantId){
+      const ratings = state.entries.filter(e=>e.plantId===plantId && e.rating).map(e=>Number(e.rating));
+      if(!ratings.length) return null;
+      return ratings.reduce((a,b)=>a+b,0)/ratings.length;
+    }
+    function healthClass(h){
+      if(h==="Problem") return "danger";
+      if(h==="Watch") return "warn";
+      if(h==="Excellent" || h==="Good") return "good";
+      return "";
+    }
+    function upcomingTasks(days=14){
+      const end = addDays(todayISO(), Number(days));
+      const tasks = [];
+      state.plants.forEach(p=>{
+        let water = nextTaskDate(p,"Watered");
+        let fert = nextTaskDate(p,"Fertilized");
+        let safety=0;
+        while(water <= end && safety++ < 100){
+          if(water >= todayISO()) tasks.push({id:uid(),plantId:p.id,plant:p.name,type:"Watered",date:water,note:p.water.note});
+          water = addDays(water,p.water.days);
+        }
+        safety=0;
+        while(fert <= end && safety++ < 100){
+          if(fert >= todayISO()) tasks.push({id:uid(),plantId:p.id,plant:p.name,type:"Fertilized",date:fert,note:p.fertilizer.note});
+          fert = addDays(fert,p.fertilizer.days);
+        }
+      });
+      return tasks.sort((a,b)=>a.date.localeCompare(b.date));
+    }
+
+    function plantIllustration(kind="leaf"){
+      const colors = {
+        herb:["#2f6848","#8faa73","#dbe8d2"],
+        vegetable:["#2f6848","#bb6b43","#d4a84f"],
+        flower:["#365f46","#c47f94","#f1d9df"],
+        shrub:["#31543c","#7c9d69","#dbe8d2"],
+        leaf:["#173f2c","#7fa368","#edf4e8"]
+      }[kind.replace("illustration:","")] || ["#173f2c","#7fa368","#edf4e8"];
+
+      return `
+        <svg viewBox="0 0 420 260" role="img" aria-label="Plant illustration">
+          <defs>
+            <linearGradient id="bg${kind}" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="${colors[2]}"/>
+              <stop offset="1" stop-color="#f8f7ef"/>
+            </linearGradient>
+            <filter id="shadow${kind}" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#173f2c" flood-opacity=".18"/>
+            </filter>
+          </defs>
+          <rect width="420" height="260" fill="url(#bg${kind})"/>
+          <circle cx="340" cy="45" r="84" fill="#ffffff" opacity=".35"/>
+          <circle cx="80" cy="220" r="110" fill="#ffffff" opacity=".24"/>
+          <g filter="url(#shadow${kind})">
+            <path d="M210 220 C205 170 210 120 218 78" stroke="${colors[0]}" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <path d="M214 150 C165 112 126 106 88 124 C126 165 174 174 214 150Z" fill="${colors[1]}"/>
+            <path d="M218 130 C260 88 302 78 344 98 C312 143 265 158 218 130Z" fill="${colors[0]}"/>
+            <path d="M213 93 C173 60 140 55 108 70 C137 108 177 116 213 93Z" fill="${colors[0]}" opacity=".88"/>
+            <path d="M220 82 C252 42 290 30 326 42 C304 83 263 101 220 82Z" fill="${colors[1]}" opacity=".95"/>
+            ${kind.includes("flower") ? `<circle cx="214" cy="58" r="25" fill="${colors[1]}"/><circle cx="188" cy="68" r="20" fill="${colors[2]}"/><circle cx="238" cy="69" r="20" fill="${colors[2]}"/><circle cx="214" cy="82" r="18" fill="#d4a84f"/>` : ""}
+            ${kind.includes("vegetable") ? `<circle cx="168" cy="156" r="16" fill="${colors[1]}"/><circle cx="252" cy="139" r="13" fill="${colors[1]}"/><circle cx="195" cy="98" r="12" fill="#d4a84f"/>` : ""}
+          </g>
+        </svg>`;
+    }
+
+    function mediaMarkup(src, label="Plant image"){
+      if(!src || src.startsWith("illustration:")){
+        return plantIllustration(src || "illustration:leaf");
+      }
+      if(src.startsWith("emoji:")){
+        return plantIllustration("illustration:leaf");
+      }
+      return `<img src="${src}" alt="${escapeHTML(label)}">`;
+    }
+
+    function setView(view){
+      currentView=view;
+      selectedPlantId=null;
+      document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+      document.querySelectorAll("main > section:not(.hero)").forEach(s=>s.classList.add("hidden"));
+      document.getElementById(view+"View").classList.remove("hidden");
+      const copy = {
+        dashboard:["Know what works in your garden.","Track plant care, photos, schedules, observations, and results so every season teaches you something useful."],
+        calendar:["Stay ahead of plant care.","See watering and fertilizing tasks generated from each plant’s schedule."],
+        journal:["Capture the story behind the results.","Record practices, observations, problems, and visible changes over time."],
+        analytics:["Turn gardening into evidence.","Compare care routines and outcomes so you can repeat what works."]
+      };
+      document.getElementById("heroTitle").textContent=copy[view][0];
+      document.getElementById("heroSubtitle").textContent=copy[view][1];
+      render();
+    }
+
+    function showPlantDetail(id){
+      selectedPlantId=id;
+      document.querySelectorAll("main > section:not(.hero)").forEach(s=>s.classList.add("hidden"));
+      document.getElementById("plantDetailView").classList.remove("hidden");
+      document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+      const p=plantById(id);
+      document.getElementById("heroTitle").textContent=p.name;
+      document.getElementById("heroSubtitle").textContent=`${p.variety || p.type} · ${p.location || "No location set"} · ${p.goal || "Track care and outcomes"}`;
+      renderPlantDetail();
+    }
+
+    function render(){
+      renderStats();
+      renderPlantCards();
+      renderCalendar();
+      renderJournal();
+      renderAnalytics();
+      fillPlantSelects();
+    }
+
+    function renderStats(){
+      const tasks7 = upcomingTasks(7).length;
+      const photoCount = state.plants.reduce((n,p)=>n+(p.photos?.length||0),0);
+      const entries = state.entries.length;
+      const watch = state.plants.filter(p=>["Watch","Problem"].includes(p.health)).length;
+      const data = [
+        [state.plants.length,"Plants tracked"],
+        [tasks7,"Tasks next 7 days"],
+        [photoCount,"Progress photos"],
+        [watch,"Needs attention"]
+      ];
+      document.getElementById("stats").innerHTML=data.map(([num,label])=>`
+        <div class="stat"><div class="stat-value">${escapeHTML(String(num))}</div><div class="stat-label">${label}</div></div>
+      `).join("");
+    }
+
+    function renderPlantCards(){
+      const el=document.getElementById("plantCards");
+      if(!state.plants.length){
+        el.innerHTML=`<div class="empty full">No plants yet. Add your first plant profile.</div>`;
+        return;
+      }
+      el.innerHTML=state.plants.map(p=>{
+        const ph=latestPhoto(p);
+        const avg=avgRating(p.id);
+        const water=nextTaskDate(p,"Watered");
+        const fert=nextTaskDate(p,"Fertilized");
+        const plantedDays=Math.max(0,daysBetween(p.planted,todayISO()));
+        const progress=Math.min(100, Math.round((plantedDays/90)*100));
+        return `<article class="plant-card">
+          <div class="plant-visual">
+            ${mediaMarkup(ph?.src, p.name)}
+            <span class="visual-label">${escapeHTML(p.type)} · ${escapeHTML(p.sun || "Light not set")}</span>
+          </div>
+          <div class="plant-head">
+            <div>
+              <h3 class="plant-name">${escapeHTML(p.name)}</h3>
+              <p class="plant-subtitle">${escapeHTML(p.variety || p.location || "No variety set")}</p>
+            </div>
+            <span class="chip ${healthClass(p.health)}">${p.health}</span>
+          </div>
+
+          <div class="plant-meta">
+            <div class="metric-row"><span>Next water</span><strong>${fmt(water)}</strong></div>
+            <div class="metric-row"><span>Next fertilizer</span><strong>${fmt(fert)}</strong></div>
+            <div class="metric-row"><span>Avg result</span><strong>${avg ? avg.toFixed(1)+"/5" : "No data"}</strong></div>
+          </div>
+
+          <div class="small-note">Season progress estimate
+            <div class="progress-bar"><span style="width:${progress}%"></span></div>
+          </div>
+
+          <div class="card-footer" style="margin-top:17px">
+            <button class="btn" onclick="showPlantDetail('${p.id}')">View profile</button>
+            <button class="btn secondary" onclick="markDone('${p.id}','Watered')">Watered</button>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function renderCalendar(){
+      const range = document.getElementById("taskRange")?.value || 14;
+      const tasks = upcomingTasks(range);
+      const el=document.getElementById("taskList");
+      if(!tasks.length){
+        el.innerHTML=`<div class="empty">No tasks in this range. Add plant schedules or widen the date range.</div>`;
+        return;
+      }
+      el.innerHTML=tasks.map(t=>`
+        <div class="task">
+          <div class="task-date">${shortDate(t.date)}<small>${dayName(t.date)}</small></div>
+          <div>
+            <strong>${t.type === "Watered" ? "Water" : "Fertilize"} ${escapeHTML(t.plant)}</strong>
+            <p class="small-note" style="margin:.25rem 0 0">${escapeHTML(t.note || "")}</p>
+          </div>
+          <button class="btn secondary" onclick="markDone('${t.plantId}','${t.type}')">Mark done</button>
+        </div>
+      `).join("");
+    }
+
+    function renderJournal(){
+      const plantFilter = document.getElementById("journalPlantFilter")?.value || "all";
+      const typeFilter = document.getElementById("journalTypeFilter")?.value || "all";
+      let entries=[...state.entries].sort((a,b)=>b.date.localeCompare(a.date));
+      if(plantFilter!=="all") entries=entries.filter(e=>e.plantId===plantFilter);
+      if(typeFilter!=="all") entries=entries.filter(e=>e.action===typeFilter);
+
+      const el=document.getElementById("journalList");
+      if(!entries.length){
+        el.innerHTML=`<div class="empty">No matching journal entries.</div>`;
+        return;
+      }
+      el.innerHTML=entries.map(e=>{
+        const p=plantById(e.plantId) || {name:"Unknown plant"};
+        return `<div class="timeline-item">
+          <div class="timeline-date">${fmt(e.date)}</div>
+          <div class="timeline-body">
+            <strong>${escapeHTML(e.action)} <span class="chip">Result ${e.rating}/5</span> <span class="small-note">${escapeHTML(p.name)}</span></strong>
+            <p>${escapeHTML(e.notes || "")}</p>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    function renderAnalytics(){
+      const totalEntries=state.entries.length;
+      const avg = state.entries.length ? state.entries.reduce((s,e)=>s+Number(e.rating||0),0)/state.entries.length : 0;
+      const bestPlant = [...state.plants].map(p=>({p,avg:avgRating(p.id)})).filter(x=>x.avg).sort((a,b)=>b.avg-a.avg)[0];
+      const issues = state.entries.filter(e=>Number(e.rating)<=2).length;
+      const data = [
+        [totalEntries,"Journal entries"],
+        [avg ? avg.toFixed(1) : "—","Average result"],
+        [bestPlant ? bestPlant.p.name : "—","Top performer"],
+        [issues,"Problem entries"]
+      ];
+      document.getElementById("analyticsStats").innerHTML=data.map(([num,label])=>`
+        <div class="stat"><div class="stat-value">${escapeHTML(String(num))}</div><div class="stat-label">${label}</div></div>
+      `).join("");
+      document.getElementById("bestInsight").textContent = bestPlant
+        ? `${bestPlant.p.name} currently has the strongest results at ${bestPlant.avg.toFixed(1)}/5. A full version could compare this against watering frequency, fertilizer, sunlight, and location.`
+        : "Add journal entries with ratings to generate useful insights.";
+
+      const rows = state.plants.map(p=>{
+        const entries=entriesForPlant(p.id);
+        const avg=avgRating(p.id);
+        const last=entries[0];
+        return `<tr>
+          <td><strong>${escapeHTML(p.name)}</strong><br><span class="small-note">${escapeHTML(p.variety||p.type)}</span></td>
+          <td>${entries.length}</td>
+          <td>${avg ? avg.toFixed(1)+"/5" : "—"}</td>
+          <td><span class="chip ${healthClass(p.health)}">${p.health}</span></td>
+          <td>${last ? fmt(last.date)+" — "+escapeHTML(last.action) : "No entries"}</td>
+        </tr>`;
+      }).join("");
+      document.getElementById("performanceTable").innerHTML=`<thead><tr><th>Plant</th><th>Entries</th><th>Avg rating</th><th>Health</th><th>Last action</th></tr></thead><tbody>${rows}</tbody>`;
+    }
+
+    function renderPlantDetail(){
+      const p=plantById(selectedPlantId);
+      if(!p) return setView("dashboard");
+      const entries=entriesForPlant(p.id);
+      const photos=[...(p.photos||[])].sort((a,b)=>a.date.localeCompare(b.date));
+      const el=document.getElementById("plantDetailView");
+      el.innerHTML = `<div class="grid detail-layout">
+        <div class="grid">
+          <div class="panel">
+            <div class="section-title">
+              <div>
+                <h3>${escapeHTML(p.name)} profile</h3>
+                <p class="small-note">${escapeHTML(p.goal || "No goal set")}</p>
+              </div>
+              <span class="chip ${healthClass(p.health)}">${p.health}</span>
+            </div>
+            <div class="plant-meta">
+              <div class="metric-row"><span>Variety</span><strong>${escapeHTML(p.variety || "Not specified")}</strong></div>
+              <div class="metric-row"><span>Type</span><strong>${escapeHTML(p.type)}</strong></div>
+              <div class="metric-row"><span>Planted</span><strong>${fmt(p.planted)}</strong></div>
+              <div class="metric-row"><span>Location</span><strong>${escapeHTML(p.location || "Not specified")}</strong></div>
+              <div class="metric-row"><span>Sun</span><strong>${escapeHTML(p.sun || "Not specified")}</strong></div>
+              <div class="metric-row"><span>Soil</span><strong>${escapeHTML(p.soil || "Not specified")}</strong></div>
+              <div class="metric-row"><span>Container/bed</span><strong>${escapeHTML(p.container || "Not specified")}</strong></div>
+              <div class="metric-row"><span>Notes</span><strong>${escapeHTML(p.notes || "None")}</strong></div>
+            </div>
+            <button class="btn secondary" onclick="setView('dashboard')">Back to dashboard</button>
+          </div>
+
+          <div class="panel">
+            <div class="section-title">
+              <h3>Photo growth timeline</h3>
+              <span class="small-note">${photos.length} photos</span>
+            </div>
+            <div class="photo-grid">
+              ${photos.length ? photos.map(ph=>`<div class="photo-tile">
+                <div class="photo-image">${mediaMarkup(ph.src, ph.caption || p.name)}</div>
+                <div class="photo-caption"><strong>${fmt(ph.date)}</strong><br>${escapeHTML(ph.caption || "")}</div>
+              </div>`).join("") : `<div class="empty full">No photos yet.</div>`}
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-title">
+              <h3>History</h3>
+              <button class="btn secondary" onclick="markDone('${p.id}','Observed')">Add observation</button>
+            </div>
+            <div class="timeline">
+              ${entries.length ? entries.map(e=>`<div class="timeline-item">
+                <div class="timeline-date">${fmt(e.date)}</div>
+                <div class="timeline-body">
+                  <strong>${escapeHTML(e.action)} <span class="chip">Result ${e.rating}/5</span></strong>
+                  <p>${escapeHTML(e.notes || "")}</p>
+                </div>
+              </div>`).join("") : `<div class="empty">No history yet.</div>`}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <h3 style="margin-top:0">Care rhythm</h3>
+            <div class="plant-meta">
+              <div class="metric-row"><span>Water every</span><strong>${p.water.days} days</strong></div>
+              <div class="metric-row"><span>Next water</span><strong>${fmt(nextTaskDate(p,"Watered"))}</strong></div>
+              <div class="metric-row"><span>Water note</span><strong>${escapeHTML(p.water.note || "None")}</strong></div>
+              <div class="metric-row"><span>Fertilize every</span><strong>${p.fertilizer.days} days</strong></div>
+              <div class="metric-row"><span>Next fertilizer</span><strong>${fmt(nextTaskDate(p,"Fertilized"))}</strong></div>
+              <div class="metric-row"><span>Fertilizer note</span><strong>${escapeHTML(p.fertilizer.note || "None")}</strong></div>
+            </div>
+            <div class="card-footer">
+              <button class="btn" onclick="markDone('${p.id}','Watered')">Watered today</button>
+              <button class="btn secondary" onclick="markDone('${p.id}','Fertilized')">Fertilized today</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-top:0">Upload progress photo</h3>
+            <p class="small-note">Photos stay in this browser for the demo.</p>
+            <form id="photoForm" class="form-grid">
+              <label class="full file-drop">Photo
+                <input id="photoInput" type="file" accept="image/*" required>
+              </label>
+              <label>Date
+                <input id="photoDate" type="date" value="${todayISO()}" required>
+              </label>
+              <label>Caption
+                <input id="photoCaption" placeholder="Seedling, first bloom, harvest...">
+              </label>
+              <button class="btn full" type="submit">Add photo</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin-top:0">Log care or result</h3>
+            <form id="plantEntryForm" class="form-grid">
+              <label>Action
+                <select id="plantEntryAction">
+                  <option>Watered</option><option>Fertilized</option><option>Pruned</option>
+                  <option>Treated pest/disease</option><option>Observed</option><option>Harvested</option>
+                </select>
+              </label>
+              <label>Rating
+                <select id="plantEntryRating">
+                  <option value="5">5 — excellent</option><option value="4">4 — good</option>
+                  <option value="3">3 — neutral</option><option value="2">2 — poor</option><option value="1">1 — problem</option>
+                </select>
+              </label>
+              <label class="full">Notes
+                <textarea id="plantEntryNotes" placeholder="What did you do, and what changed afterward?"></textarea>
+              </label>
+              <button class="btn full" type="submit">Save entry</button>
+            </form>
+          </div>
+        </div>
+      </div>`;
+      bindPlantDetailForms();
+    }
+
+    function bindPlantDetailForms(){
+      document.getElementById("photoForm").addEventListener("submit", (e)=>{
+        e.preventDefault();
+        const file=document.getElementById("photoInput").files[0];
+        const date=document.getElementById("photoDate").value;
+        const caption=document.getElementById("photoCaption").value;
+        if(!file) return;
+        const reader=new FileReader();
+        reader.onload=()=>{
+          const p=plantById(selectedPlantId);
+          p.photos = p.photos || [];
+          p.photos.push({id:uid(),date,caption,src:reader.result});
+          saveState(); showToast("Photo added"); renderPlantDetail();
+        };
+        reader.readAsDataURL(file);
+      });
+      document.getElementById("plantEntryForm").addEventListener("submit",(e)=>{
+        e.preventDefault();
+        const action=document.getElementById("plantEntryAction").value;
+        const rating=Number(document.getElementById("plantEntryRating").value);
+        const notes=document.getElementById("plantEntryNotes").value;
+        state.entries.push({id:uid(),plantId:selectedPlantId,date:todayISO(),action,rating,notes});
+        saveState(); showToast("Entry saved"); renderPlantDetail();
+      });
+    }
+
+    function fillPlantSelects(){
+      const options = `<option value="all">All plants</option>` + state.plants.map(p=>`<option value="${p.id}">${escapeHTML(p.name)}</option>`).join("");
+      const only = state.plants.map(p=>`<option value="${p.id}">${escapeHTML(p.name)}</option>`).join("");
+      const filter=document.getElementById("journalPlantFilter");
+      const quick=document.getElementById("quickPlant");
+      if(filter){
+        const old=filter.value;
+        filter.innerHTML=options;
+        filter.value=[...filter.options].some(o=>o.value===old)?old:"all";
+      }
+      if(quick){
+        const old=quick.value;
+        quick.innerHTML=only;
+        quick.value=[...quick.options].some(o=>o.value===old)?old:(state.plants[0]?.id||"");
+      }
+    }
+
+    function markDone(plantId, action){
+      const p=plantById(plantId);
+      if(!p) return;
+      let notes = action==="Watered" ? p.water.note : action==="Fertilized" ? p.fertilizer.note : "Observation added.";
+      state.entries.push({id:uid(),plantId,date:todayISO(),action,rating:4,notes});
+      saveState();
+      showToast(`${action} saved`);
+      if(selectedPlantId) renderPlantDetail(); else render();
+    }
+
+    function escapeHTML(str){
+      return String(str ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    }
+
+    document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>setView(btn.dataset.view)));
+    document.getElementById("addPlantBtn").addEventListener("click",()=>{
+      document.getElementById("plantDate").value=todayISO();
+      document.getElementById("plantModal").classList.remove("hidden");
+    });
+    document.getElementById("closePlantModal").addEventListener("click",()=>document.getElementById("plantModal").classList.add("hidden"));
+    document.getElementById("plantForm").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const type=document.getElementById("plantType").value;
+      const illustration = type==="Herb" ? "illustration:herb" : type==="Flower" ? "illustration:flower" : type==="Shrub" ? "illustration:shrub" : type==="Vegetable" ? "illustration:vegetable" : "illustration:leaf";
+      const newPlant = {
+        id:uid(),
+        name:document.getElementById("plantName").value,
+        variety:document.getElementById("plantVariety").value,
+        type,
+        planted:document.getElementById("plantDate").value,
+        location:document.getElementById("plantLocation").value,
+        sun:document.getElementById("plantSun").value,
+        soil:document.getElementById("plantSoil").value,
+        container:document.getElementById("plantContainer").value,
+        health:document.getElementById("plantHealth").value,
+        goal:document.getElementById("plantGoal").value,
+        notes:document.getElementById("plantNotes").value,
+        water:{days:Number(document.getElementById("plantWaterDays").value || 3), note:document.getElementById("plantWaterNote").value},
+        fertilizer:{days:Number(document.getElementById("plantFertDays").value || 14), note:document.getElementById("plantFertNote").value},
+        photos:[{id:uid(),date:document.getElementById("plantDate").value,caption:"Plant profile created",src:illustration}]
+      };
+      state.plants.push(newPlant);
+      saveState();
+      e.target.reset();
+      document.getElementById("plantModal").classList.add("hidden");
+      showToast("Plant created");
+      setView("dashboard");
+    });
+
+    document.getElementById("quickDate").value=todayISO();
+    document.getElementById("quickEntryForm").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      if(!state.plants.length) return showToast("Add a plant first");
+      state.entries.push({
+        id:uid(),
+        plantId:document.getElementById("quickPlant").value,
+        date:document.getElementById("quickDate").value,
+        action:document.getElementById("quickAction").value,
+        rating:Number(document.getElementById("quickRating").value),
+        notes:document.getElementById("quickNotes").value
+      });
+      document.getElementById("quickNotes").value="";
+      saveState(); showToast("Journal entry saved"); renderJournal(); renderAnalytics(); renderStats();
+    });
+
+    document.getElementById("journalPlantFilter").addEventListener("change",renderJournal);
+    document.getElementById("journalTypeFilter").addEventListener("change",renderJournal);
+    document.getElementById("taskRange").addEventListener("change",renderCalendar);
+
+    document.getElementById("resetBtn").addEventListener("click",()=>{
+      if(confirm("Reset the prototype to sample data?")){
+        state=sampleData();
+        saveState();
+        showToast("Demo reset");
+        setView("dashboard");
+      }
+    });
+
+    document.getElementById("exportBtn").addEventListener("click",()=>{
+      const data=JSON.stringify(state,null,2);
+      navigator.clipboard?.writeText(data).then(()=>showToast("Data copied")).catch(()=>{
+        const blob = new Blob([data], {type:"application/json"});
+        const url = URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url; a.download="gardenwise-data.json"; a.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    document.getElementById("importBtn").addEventListener("click",()=>document.getElementById("importModal").classList.remove("hidden"));
+    document.getElementById("closeImportModal").addEventListener("click",()=>document.getElementById("importModal").classList.add("hidden"));
+    document.getElementById("cancelImportBtn").addEventListener("click",()=>document.getElementById("importModal").classList.add("hidden"));
+    document.getElementById("doImportBtn").addEventListener("click",()=>{
+      try{
+        const parsed=JSON.parse(document.getElementById("importText").value);
+        if(!parsed.plants || !parsed.entries) throw new Error("Missing plants or entries");
+        state=parsed; saveState(); document.getElementById("importModal").classList.add("hidden"); showToast("Data imported"); setView("dashboard");
+      }catch(e){ alert("Could not import. Make sure you pasted valid JSON exported from this prototype."); }
+    });
+
+    fillPlantSelects();
+    render();
+  </script>
+</body>
+</html>
